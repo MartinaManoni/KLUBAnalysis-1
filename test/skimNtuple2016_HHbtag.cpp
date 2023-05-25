@@ -67,6 +67,12 @@
 // Multiclass
 #include "../src/MulticlassInterface.cc"
 
+//DNN ditauMLMass MARTINA
+#include "diTauMLMassInterface.h"
+#include "diTauMLMassLEInterface.h"
+#include "diTauMLMassHOInterface.h"
+#include "diTauMLMassHEInterface.h"
+
 using namespace std ;
 using DNNVector = ROOT::Math::LorentzVector<ROOT::Math::PxPyPzM4D<float>>;
 
@@ -551,6 +557,26 @@ int main (int argc, char** argv)
     models.at(n) = ss_model.str();
   }
   HHbtagKLUBinterface HHbtagTagger(models, 2016);
+   
+  //diTauModel MARTINA (LOW ODD MODEL)
+  std::string diTauML_model = gConfigParser->readStringOption ("diTauMLMass::weights");
+  cout << "** INFO: diTauML_model: " << diTauML_model << endl;
+  ditauMLMass::diTauMLMass diTauML(diTauML_model);
+
+  //diTauModel LOW EVEN 
+ std::string diTauMLLowEven_model= gConfigParser->readStringOption ("diTauMLMassLowEven::weights");
+  cout << "** INFO: diTauMLLowEven_model: " << diTauMLLowEven_model << endl;
+  ditauMLMassLowEven::diTauMLMassLowEven diTauMLLowEven (diTauMLLowEven_model);
+
+  //diTauModel HIGH ODD 
+  std::string diTauMLHighOdd_model= gConfigParser->readStringOption ("diTauMLMassHighOdd::weights");
+  cout << "** INFO: diTauMLHighOdd_model: " << diTauMLHighOdd_model << endl;
+  ditauMLMassHighOdd ::diTauMLMassHighOdd diTauMLHighOdd (diTauMLHighOdd_model);
+
+  //diTauModel HIGH EVEN 
+  std::string diTauMLHighEven_model= gConfigParser->readStringOption ("diTauMLMassHighEven::weights");
+  cout << "** INFO: diTauMLHighEven_model: " << diTauMLHighEven_model << endl;
+  ditauMLMassHighEven::diTauMLMassHighEven diTauMLHighEven (diTauMLHighEven_model);
 
   // ------------------------------
   //tau legs trigger SF for data and mc
@@ -1465,7 +1491,7 @@ int main (int argc, char** argv)
       int dauType = theBigTree.particleType->at(idau);
       if (oph.isMuon(dauType))
       {
-	bool passMu   = oph.muBaseline (&theBigTree, idau, 19., 2.3, 0.15, OfflineProducerHelper::MuTight, string("All") , (DEBUG ? true : false));
+	bool passMu   = oph.muBaseline (&theBigTree, idau, 19., 2.1, 0.15, OfflineProducerHelper::MuTight, string("All") , (DEBUG ? true : false));
 	bool passMu10 = oph.muBaseline (&theBigTree, idau, 10., 2.4, 0.30, OfflineProducerHelper::MuTight, string("All") , (DEBUG ? true : false));
 
 	if (passMu) ++nmu;
@@ -1473,7 +1499,7 @@ int main (int argc, char** argv)
       }
       else if (oph.isElectron(dauType))
       {
-	bool passEle   = oph.eleBaseline (&theBigTree, idau, 25., 2.3, 0.1, OfflineProducerHelper::EMVATight, string("Vertex-LepID-pTMin-etaMax") , (DEBUG ? true : false));
+	bool passEle   = oph.eleBaseline (&theBigTree, idau, 25., 2.1, 0.1, OfflineProducerHelper::EMVATight, string("Vertex-LepID-pTMin-etaMax") , (DEBUG ? true : false));
 	bool passEle10 = oph.eleBaseline (&theBigTree, idau, 10., 2.5, 0.3, OfflineProducerHelper::EMVATight, string("Vertex-LepID-pTMin-etaMax") , (DEBUG ? true : false));
 
 	if (passEle) ++nele;
@@ -1499,8 +1525,8 @@ int main (int argc, char** argv)
 	     << " dxy="       << setw(15) << left << theBigTree.dxy->at(idau)
 	     << " dz="        << setw(15) << left << theBigTree.dz->at(idau)
 	     << " mutightID=" << setw(3)  << left << CheckBit(theBigTree.daughters_muonID->at(idau),3)
-	     << " mubase="    << setw(3)  << left << oph.muBaseline (&theBigTree, idau, 10., 2.3, 0.15, OfflineProducerHelper::MuTight, string("All"))
-	     << " ebase="     << setw(3)  << left << oph.eleBaseline(&theBigTree, idau, 10., 2.3, 0.1, OfflineProducerHelper::EMVATight, string("Vertex-LepID-pTMin-etaMax"))
+	     << " mubase="    << setw(3)  << left << oph.muBaseline (&theBigTree, idau, 10., 2.1, 0.15, OfflineProducerHelper::MuTight, string("All"))
+	     << " ebase="     << setw(3)  << left << oph.eleBaseline(&theBigTree, idau, 10., 2.1, 0.1, OfflineProducerHelper::EMVATight, string("Vertex-LepID-pTMin-etaMax"))
 	     << endl;
       }
     } // end loop on daughters
@@ -4403,7 +4429,7 @@ int main (int argc, char** argv)
       theSmallTree.m_HH_eta = tlv_HH.Eta () ;
       theSmallTree.m_HH_phi = tlv_HH.Phi () ;
       theSmallTree.m_HH_e = tlv_HH.E () ;
-      theSmallTree.m_HH_mass = tlv_HH.M () ;
+      theSmallTree.m_HH_mass = tlv_HH.M () ; //MARTINA
       theSmallTree.m_HH_mass_raw = tlv_HH_raw.M () ;
       theSmallTree.m_HH_deltaR = tlv_bH.DeltaR(tlv_tauH);
 
@@ -5828,8 +5854,395 @@ int main (int argc, char** argv)
 	  }
 	}
       }
-    }// if there's two jets in the event, at least
+   // }// if there's two jets in the event, at least
 
+
+
+        //diTauMLMass_MARTINA
+         std::vector <float> diTauMLMass;
+         std::vector <float> diTauMLMassLowEven;
+         std::vector <float> diTauMLMassHighOdd;
+         std::vector <float> diTauMLMassHighEven;
+
+	int Num_neutrinos=3;
+        if (pairType == 2) Num_neutrinos=2;
+
+      //LOW MASS
+      // if ((theSmallTree.m_genMHH) < 599){
+        
+       if (iEvent % 2 == 0) { 
+       std::cout << "Event EVEN - using diTauMLMass LOW ODD and HIGH ODD" << iEvent << std::endl ; //odd= dispari even= pari   
+       if (pairType < 3){
+	diTauMLMass = diTauML.GetScore(tlv_firstLepton.Px (), tlv_firstLepton.Py (),tlv_firstLepton.Pz (), theBigTree.daughters_e->at (firstDaughterIndex), tlv_secondLepton.Px (), tlv_secondLepton.Py (), tlv_secondLepton.Pz (), theBigTree.daughters_e->at (secondDaughterIndex), tlv_firstLepton.Pt (), tlv_firstLepton.Eta () , tlv_firstLepton.Phi () , tlv_secondLepton.Pt (), tlv_secondLepton.Eta () , tlv_secondLepton.Phi () , theBigTree.decayMode->at(firstDaughterIndex), theBigTree.decayMode->at(secondDaughterIndex), deltaPhi (tlv_firstLepton.Phi (),tlv_secondLepton.Phi ()),fabs(tlv_firstLepton.Eta ()- tlv_secondLepton.Eta ()) ,vMET.Mod(), TVector2::Phi_mpi_pi(vMET.Phi()),vMET.X(), vMET.Y(),vDeepMET_ResponseTune.X(), vDeepMET_ResponseTune.Y(), vDeepMET_ResolutionTune.X(), vDeepMET_ResolutionTune.Y(), theBigTree.MET_cov00->at (chosenTauPair), theBigTree.MET_cov01->at (chosenTauPair),theBigTree.MET_cov11->at (chosenTauPair),theBigTree.npv,tlv_firstBjet.Pt () ,tlv_firstBjet.Eta () ,tlv_firstBjet.Phi () ,theBigTree.bDeepFlavor_probb->at(bjet1idx) + theBigTree.bDeepFlavor_probbb->at(bjet1idx) + theBigTree.bDeepFlavor_problepb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet1idx),tlv_secondBjet.Pt() ,tlv_secondBjet.Eta() ,tlv_secondBjet.Phi() ,theBigTree.bDeepFlavor_probb->at(bjet2idx) + theBigTree.bDeepFlavor_probbb->at(bjet2idx) + theBigTree.bDeepFlavor_problepb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet2idx),theBigTree.mT_Dau1->at (chosenTauPair),theBigTree.mT_Dau2->at (chosenTauPair),Calculate_MT(tlv_firstLepton, tlv_secondLepton), 
+Calculate_TotalMT(tlv_firstLepton, tlv_secondLepton, tlv_MET),tlv_tauH.M (), Num_neutrinos, pairType, ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_secondLepton),fabs(ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet)),
+ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet),ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_MET), ROOT::Math::VectorUtil::DeltaPhi(tlv_bH, tlv_MET),theSmallTree.m_BDT_HT20, Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet),getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).first, Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).second, ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH + tlv_MET),
+ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH), Calculate_phi (getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_phi1(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)), 	Calculate_phi1(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_cosTheta_2bodies(getLVfromTLV(tlv_MET), getLVfromTLV(tlv_bH)), Calculate_cosTheta_2bodies(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_bH))    
+);
+
+diTauMLMassHighOdd= diTauMLHighOdd.GetScore(tlv_firstLepton.Px (), tlv_firstLepton.Py (),tlv_firstLepton.Pz (), theBigTree.daughters_e->at (firstDaughterIndex), tlv_secondLepton.Px (), tlv_secondLepton.Py (), tlv_secondLepton.Pz (), theBigTree.daughters_e->at (secondDaughterIndex), tlv_firstLepton.Pt (), tlv_firstLepton.Eta () , tlv_firstLepton.Phi () , tlv_secondLepton.Pt (), tlv_secondLepton.Eta () , tlv_secondLepton.Phi () , theBigTree.decayMode->at(firstDaughterIndex), theBigTree.decayMode->at(secondDaughterIndex), deltaPhi (tlv_firstLepton.Phi (),tlv_secondLepton.Phi ()),fabs(tlv_firstLepton.Eta ()- tlv_secondLepton.Eta ()) ,vMET.Mod(), TVector2::Phi_mpi_pi(vMET.Phi()), vMET.X(), vMET.Y(),vDeepMET_ResponseTune.X(), vDeepMET_ResponseTune.Y(), vDeepMET_ResolutionTune.X(), vDeepMET_ResolutionTune.Y(), theBigTree.MET_cov00->at (chosenTauPair), theBigTree.MET_cov01->at (chosenTauPair),theBigTree.MET_cov11->at (chosenTauPair),theBigTree.npv,tlv_firstBjet.Pt () ,tlv_firstBjet.Eta () ,tlv_firstBjet.Phi () ,theBigTree.bDeepFlavor_probb->at(bjet1idx) + theBigTree.bDeepFlavor_probbb->at(bjet1idx) + theBigTree.bDeepFlavor_problepb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet1idx),tlv_secondBjet.Pt() ,tlv_secondBjet.Eta() ,tlv_secondBjet.Phi() ,theBigTree.bDeepFlavor_probb->at(bjet2idx) + theBigTree.bDeepFlavor_probbb->at(bjet2idx) + theBigTree.bDeepFlavor_problepb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet2idx),theBigTree.mT_Dau1->at (chosenTauPair),theBigTree.mT_Dau2->at (chosenTauPair),Calculate_MT(tlv_firstLepton, tlv_secondLepton), 
+Calculate_TotalMT(tlv_firstLepton, tlv_secondLepton, tlv_MET),tlv_tauH.M (), Num_neutrinos,pairType, ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_secondLepton),fabs(ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet)),
+ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet),ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_MET), ROOT::Math::VectorUtil::DeltaPhi(tlv_bH, tlv_MET),theSmallTree.m_BDT_HT20,Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet),getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).first, Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).second, ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH + tlv_MET),
+ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH), Calculate_phi (getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_phi1(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)), 	Calculate_phi1(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_cosTheta_2bodies(getLVfromTLV(tlv_MET), getLVfromTLV(tlv_bH)), Calculate_cosTheta_2bodies(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_bH) 
+));
+	}
+
+	//Add branches ML Classifier LOW
+        theSmallTree.m_ML_classifier0_LOW = diTauMLMass.at(9);
+        theSmallTree.m_ML_classifier1_LOW = diTauMLMass.at(10);
+        theSmallTree.m_ML_classifier2_LOW = diTauMLMass.at(11);
+
+       //Add branches ML Classifier HIGH
+        theSmallTree.m_ML_classifier0_HIGH= diTauMLMassHighOdd.at(9);
+        theSmallTree.m_ML_classifier1_HIGH = diTauMLMassHighOdd.at(10);
+        theSmallTree.m_ML_classifier2_HIGH = diTauMLMassHighOdd.at(11);
+
+       //neutrinos 
+       TLorentzVector  nu1_low, nu2_low, nu1_high, nu2_high;
+       nu1_low.SetPxPyPzE(diTauMLMass.at(0), diTauMLMass.at(1), diTauMLMass.at(2), diTauMLMass.at(3));
+       nu2_low.SetPxPyPzE(diTauMLMass.at(4), diTauMLMass.at(5), diTauMLMass.at(6), diTauMLMass.at(7));
+
+       nu1_high.SetPxPyPzE(diTauMLMassHighOdd.at(0), diTauMLMassHighOdd.at(1), diTauMLMassHighOdd.at(2), diTauMLMassHighOdd.at(3));
+       nu2_high.SetPxPyPzE(diTauMLMassHighOdd.at(4), diTauMLMassHighOdd.at(5), diTauMLMassHighOdd.at(6), diTauMLMassHighOdd.at(7));
+
+        //Add branches MassHH and  MassTauTau
+        TLorentzVector  tau1_vis, tau2_vis, HH_low, HH_high;
+        TLorentzVector bjet1, bjet2, bb;
+	double bjet1_px = tlv_firstBjet.Pt () *cos(tlv_firstBjet.Phi ());
+	double bjet1_py = tlv_firstBjet.Pt () *sin(tlv_firstBjet.Phi ());
+	double bjet1_pz = tlv_firstBjet.Pt () *TMath::SinH(tlv_firstBjet.Eta ());
+	double bjet1_e = tlv_firstBjet.Pt () *TMath::CosH(tlv_firstBjet.Eta ());
+	double bjet2_px = tlv_secondBjet.Pt () *cos(tlv_secondBjet.Phi ());
+	double bjet2_py = tlv_secondBjet.Pt () *sin(tlv_secondBjet.Phi ());
+	double bjet2_pz = tlv_secondBjet.Pt () *TMath::SinH(tlv_secondBjet.Eta ());
+	double bjet2_e = tlv_secondBjet.Pt () *TMath::CosH(tlv_secondBjet.Eta ());
+	bjet1.SetPxPyPzE(bjet1_px, bjet1_py, bjet1_pz, bjet1_e);
+	bjet2.SetPxPyPzE(bjet2_px, bjet2_py, bjet2_pz, bjet2_e);
+
+        tau1_vis.SetPxPyPzE(tlv_firstLepton.Px (),tlv_firstLepton.Py (),tlv_firstLepton.Pz (),theBigTree.daughters_e->at (firstDaughterIndex));
+        tau2_vis.SetPxPyPzE(tlv_secondLepton.Px (),tlv_secondLepton.Py (),tlv_secondLepton.Pz (),theBigTree.daughters_e->at (secondDaughterIndex));
+
+      TLorentzVector tau1_low = tau1_vis + nu1_low;
+      TLorentzVector tau2_low = tau2_vis + nu2_low;
+
+      TLorentzVector tau1_high = tau1_vis + nu1_high;
+      TLorentzVector tau2_high = tau2_vis + nu2_high;
+      // Calculate the four-momentum of the Higgs boson
+      TLorentzVector higgsTauTau_low = tau1_low + tau2_low;
+      TLorentzVector higgsTauTau_high = tau1_high + tau2_high;
+      // Calculate the invariant mass of the Higgs boson
+      float  higgs_mass_tautau_low = higgsTauTau_low.M();
+      float  higgs_mass_tautau_high = higgsTauTau_high.M();
+      //Calculate HH mass
+      HH_low = tau1_vis + tau2_vis + nu1_low + nu2_low + bjet1 + bjet2;
+      float HH_mass_low= HH_low.M();
+      
+      HH_high = tau1_vis + tau2_vis + nu1_high + nu2_high + bjet1 + bjet2;
+      float HH_mass_high= HH_high.M();
+      theSmallTree.m_ML_MassTauTau_LOW = higgs_mass_tautau_low;
+      theSmallTree.m_ML_MassTauTau_HIGH = higgs_mass_tautau_high;
+      theSmallTree.m_ML_MassHH_LOW = HH_mass_low;
+      theSmallTree.m_ML_MassHH_HIGH= HH_mass_high;
+}
+
+
+//EVENTS ODD-->USING EVEN MODELS
+
+      else if (iEvent % 2 != 0) {
+      std::cout << "Event ODD - using diTauMLMass LOW EVEN and HIGH EVEN " << iEvent << std::endl ;
+      if (pairType <3){
+	diTauMLMassLowEven = diTauMLLowEven.GetScore(tlv_firstLepton.Px (), tlv_firstLepton.Py (),tlv_firstLepton.Pz (), theBigTree.daughters_e->at (firstDaughterIndex), tlv_secondLepton.Px (), tlv_secondLepton.Py (), tlv_secondLepton.Pz (), theBigTree.daughters_e->at (secondDaughterIndex), tlv_firstLepton.Pt (), tlv_firstLepton.Eta () , tlv_firstLepton.Phi () , tlv_secondLepton.Pt (), tlv_secondLepton.Eta () , tlv_secondLepton.Phi () , theBigTree.decayMode->at(firstDaughterIndex), theBigTree.decayMode->at(secondDaughterIndex), deltaPhi (tlv_firstLepton.Phi (),tlv_secondLepton.Phi ()),fabs(tlv_firstLepton.Eta ()- tlv_secondLepton.Eta ()) , vMET.Mod(), TVector2::Phi_mpi_pi(vMET.Phi()),  vMET.X(), vMET.Y(),vDeepMET_ResponseTune.X(), vDeepMET_ResponseTune.Y(), vDeepMET_ResolutionTune.X(), vDeepMET_ResolutionTune.Y(), theBigTree.MET_cov00->at (chosenTauPair), theBigTree.MET_cov01->at (chosenTauPair),theBigTree.MET_cov11->at (chosenTauPair),theBigTree.npv,tlv_firstBjet.Pt () ,tlv_firstBjet.Eta () ,tlv_firstBjet.Phi () ,theBigTree.bDeepFlavor_probb->at(bjet1idx) + theBigTree.bDeepFlavor_probbb->at(bjet1idx) + theBigTree.bDeepFlavor_problepb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet1idx),tlv_secondBjet.Pt() ,tlv_secondBjet.Eta() ,tlv_secondBjet.Phi() ,theBigTree.bDeepFlavor_probb->at(bjet2idx) + theBigTree.bDeepFlavor_probbb->at(bjet2idx) + theBigTree.bDeepFlavor_problepb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet2idx),theBigTree.mT_Dau1->at (chosenTauPair),theBigTree.mT_Dau2->at (chosenTauPair),Calculate_MT(tlv_firstLepton, tlv_secondLepton), 
+Calculate_TotalMT(tlv_firstLepton, tlv_secondLepton, tlv_MET),tlv_tauH.M (), Num_neutrinos,pairType, ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_secondLepton),fabs(ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet)),
+ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet),ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_MET), ROOT::Math::VectorUtil::DeltaPhi(tlv_bH, tlv_MET),theSmallTree.m_BDT_HT20,Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet),getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).first, Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).second, ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH + tlv_MET),
+ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH), Calculate_phi (getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_phi1(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)), 	Calculate_phi1(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_cosTheta_2bodies(getLVfromTLV(tlv_MET), getLVfromTLV(tlv_bH)), Calculate_cosTheta_2bodies(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_bH)   
+)); 
+	diTauMLMassHighEven = diTauMLHighEven.GetScore(tlv_firstLepton.Px (), tlv_firstLepton.Py (),tlv_firstLepton.Pz (), theBigTree.daughters_e->at (firstDaughterIndex), tlv_secondLepton.Px (), tlv_secondLepton.Py (), tlv_secondLepton.Pz (), theBigTree.daughters_e->at (secondDaughterIndex), tlv_firstLepton.Pt (), tlv_firstLepton.Eta () , tlv_firstLepton.Phi () , tlv_secondLepton.Pt (), tlv_secondLepton.Eta () , tlv_secondLepton.Phi () , theBigTree.decayMode->at(firstDaughterIndex), theBigTree.decayMode->at(secondDaughterIndex), deltaPhi (tlv_firstLepton.Phi (),tlv_secondLepton.Phi ()),fabs(tlv_firstLepton.Eta ()- tlv_secondLepton.Eta ()) ,vMET.Mod(), TVector2::Phi_mpi_pi(vMET.Phi()), vMET.X(), vMET.Y(),vDeepMET_ResponseTune.X(), vDeepMET_ResponseTune.Y(), vDeepMET_ResolutionTune.X(), vDeepMET_ResolutionTune.Y(), theBigTree.MET_cov00->at (chosenTauPair), theBigTree.MET_cov01->at (chosenTauPair),theBigTree.MET_cov11->at (chosenTauPair),theBigTree.npv,tlv_firstBjet.Pt () ,tlv_firstBjet.Eta () ,tlv_firstBjet.Phi () ,theBigTree.bDeepFlavor_probb->at(bjet1idx) + theBigTree.bDeepFlavor_probbb->at(bjet1idx) + theBigTree.bDeepFlavor_problepb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet1idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet1idx),tlv_secondBjet.Pt() ,tlv_secondBjet.Eta() ,tlv_secondBjet.Phi() ,theBigTree.bDeepFlavor_probb->at(bjet2idx) + theBigTree.bDeepFlavor_probbb->at(bjet2idx) + theBigTree.bDeepFlavor_problepb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probb->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probc->at(bjet2idx),theBigTree.bParticleNetAK4JetTags_probuds->at(bjet2idx),theBigTree.mT_Dau1->at (chosenTauPair),theBigTree.mT_Dau2->at (chosenTauPair),Calculate_MT(tlv_firstLepton, tlv_secondLepton), 
+Calculate_TotalMT(tlv_firstLepton, tlv_secondLepton, tlv_MET),tlv_tauH.M (), Num_neutrinos,pairType, ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_secondLepton),fabs(ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet)),
+ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet),ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_MET), ROOT::Math::VectorUtil::DeltaPhi(tlv_bH, tlv_MET),theSmallTree.m_BDT_HT20,Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet),getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).first, Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).second, ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH + tlv_MET),
+ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH), Calculate_phi (getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_phi1(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)), 	Calculate_phi1(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+Calculate_cosTheta_2bodies(getLVfromTLV(tlv_MET), getLVfromTLV(tlv_bH)), Calculate_cosTheta_2bodies(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_bH)
+));
+	}  
+    //Add branches ML Classifier LOW
+        theSmallTree.m_ML_classifier0_LOW = diTauMLMassLowEven.at(9);
+        theSmallTree.m_ML_classifier1_LOW = diTauMLMassLowEven.at(10);
+        theSmallTree.m_ML_classifier2_LOW = diTauMLMassLowEven.at(11);
+       //Add branches ML Classifier HIGH
+        theSmallTree.m_ML_classifier0_HIGH= diTauMLMassHighEven.at(9);
+        theSmallTree.m_ML_classifier1_HIGH = diTauMLMassHighEven.at(10);
+        theSmallTree.m_ML_classifier2_HIGH = diTauMLMassHighEven.at(11);
+       //neutrinos 
+       TLorentzVector  nu1_low, nu2_low, nu1_high, nu2_high;
+       nu1_low.SetPxPyPzE(diTauMLMassLowEven.at(0), diTauMLMassLowEven.at(1), diTauMLMassLowEven.at(2), diTauMLMassLowEven.at(3));
+       nu2_low.SetPxPyPzE(diTauMLMassLowEven.at(4), diTauMLMassLowEven.at(5), diTauMLMassLowEven.at(6), diTauMLMassLowEven.at(7));
+       nu1_high.SetPxPyPzE(diTauMLMassHighEven.at(0), diTauMLMassHighEven.at(1), diTauMLMassHighEven.at(2), diTauMLMassHighEven.at(3));
+       nu2_high.SetPxPyPzE(diTauMLMassHighEven.at(4), diTauMLMassHighEven.at(5), diTauMLMassHighEven.at(6), diTauMLMassHighEven.at(7));
+        //Add branches MassHH and  MassTauTau
+        TLorentzVector  tau1_vis, tau2_vis, HH_low, HH_high;
+        TLorentzVector bjet1, bjet2, bb;
+	double bjet1_px = tlv_firstBjet.Pt () *cos(tlv_firstBjet.Phi ());
+	double bjet1_py = tlv_firstBjet.Pt () *sin(tlv_firstBjet.Phi ());
+	double bjet1_pz = tlv_firstBjet.Pt () *TMath::SinH(tlv_firstBjet.Eta ());
+	double bjet1_e = tlv_firstBjet.Pt () *TMath::CosH(tlv_firstBjet.Eta ());
+	double bjet2_px = tlv_secondBjet.Pt () *cos(tlv_secondBjet.Phi ());
+	double bjet2_py = tlv_secondBjet.Pt () *sin(tlv_secondBjet.Phi ());
+	double bjet2_pz = tlv_secondBjet.Pt () *TMath::SinH(tlv_secondBjet.Eta ());
+	double bjet2_e = tlv_secondBjet.Pt () *TMath::CosH(tlv_secondBjet.Eta ());
+	bjet1.SetPxPyPzE(bjet1_px, bjet1_py, bjet1_pz, bjet1_e);
+	bjet2.SetPxPyPzE(bjet2_px, bjet2_py, bjet2_pz, bjet2_e);
+        tau1_vis.SetPxPyPzE(tlv_firstLepton.Px (),tlv_firstLepton.Py (),tlv_firstLepton.Pz (),theBigTree.daughters_e->at (firstDaughterIndex));
+        tau2_vis.SetPxPyPzE(tlv_secondLepton.Px (),tlv_secondLepton.Py (),tlv_secondLepton.Pz (),theBigTree.daughters_e->at (secondDaughterIndex));
+      TLorentzVector tau1_low = tau1_vis + nu1_low;
+      TLorentzVector tau2_low = tau2_vis + nu2_low;
+
+      TLorentzVector tau1_high = tau1_vis + nu1_high;
+      TLorentzVector tau2_high = tau2_vis + nu2_high;
+      // Calculate the four-momentum of the Higgs boson
+      TLorentzVector higgsTauTau_low = tau1_low + tau2_low;
+      TLorentzVector higgsTauTau_high = tau1_high + tau2_high;
+      // Calculate the invariant mass of the Higgs boson
+      float  higgs_mass_tautau_low = higgsTauTau_low.M();
+      float  higgs_mass_tautau_high = higgsTauTau_high.M();
+      //Calculate HH mass
+      HH_low = tau1_vis + tau2_vis + nu1_low + nu2_low + bjet1 + bjet2;
+      float HH_mass_low= HH_low.M();
+      HH_high = tau1_vis + tau2_vis + nu1_high + nu2_high + bjet1 + bjet2;
+      float HH_mass_high= HH_high.M();
+      theSmallTree.m_ML_MassTauTau_LOW = higgs_mass_tautau_low;
+      theSmallTree.m_ML_MassTauTau_HIGH = higgs_mass_tautau_high;
+      theSmallTree.m_ML_MassHH_LOW = HH_mass_low;
+      theSmallTree.m_ML_MassHH_HIGH= HH_mass_high;
+}
+
+  
+
+
+     
+   /*     if (pairType == 0 || pairType == 1){
+
+	diTauMLMass = diTauML.GetScore(
+        tlv_firstLepton.Px (), 
+        tlv_firstLepton.Py (),
+        tlv_firstLepton.Pz (),
+        theBigTree.daughters_e->at (firstDaughterIndex), 
+        tlv_secondLepton.Px (), 
+        tlv_secondLepton.Py (),
+        tlv_secondLepton.Pz (), 
+        theBigTree.daughters_e->at (secondDaughterIndex),
+        tlv_firstLepton.Pt (),
+        tlv_firstLepton.Eta () ,
+        tlv_firstLepton.Phi () ,
+        tlv_secondLepton.Pt (),
+        tlv_secondLepton.Eta () ,
+        tlv_secondLepton.Phi () ,
+        theBigTree.decayMode->at(firstDaughterIndex),
+	theBigTree.decayMode->at(secondDaughterIndex),
+        deltaPhi (tlv_firstLepton.Phi (),tlv_secondLepton.Phi ()),
+        fabs(tlv_firstLepton.Eta ()- tlv_secondLepton.Eta ()) ,
+         TVector2::Phi_mpi_pi(vMET.Phi()),
+    	 vMET.Mod(), 
+         vMET.X(),
+         vMET.Y(),
+        vDeepMET_ResponseTune.X(),
+        vDeepMET_ResponseTune.Y(),
+        vDeepMET_ResolutionTune.X(),
+        vDeepMET_ResolutionTune.Y(),
+        theBigTree.MET_cov00->at (chosenTauPair), 
+        theBigTree.MET_cov01->at (chosenTauPair),
+        theBigTree.MET_cov11->at (chosenTauPair),
+        theBigTree.npv,
+        tlv_firstBjet.Pt () ,
+        tlv_firstBjet.Eta () ,
+        tlv_firstBjet.Phi () ,
+       theBigTree.bDeepFlavor_probb->at(bjet1idx) + theBigTree.bDeepFlavor_probbb->at(bjet1idx) + theBigTree.bDeepFlavor_problepb->at(bjet1idx),
+      theBigTree.bParticleNetAK4JetTags_probb->at(bjet1idx),
+      theBigTree.bParticleNetAK4JetTags_probc->at(bjet1idx),
+      theBigTree.bParticleNetAK4JetTags_probuds->at(bjet1idx),
+       tlv_secondBjet.Pt() ,
+       tlv_secondBjet.Eta() ,
+       tlv_secondBjet.Phi() ,
+       theBigTree.bDeepFlavor_probb->at(bjet2idx) + theBigTree.bDeepFlavor_probbb->at(bjet2idx) + theBigTree.bDeepFlavor_problepb->at(bjet2idx),
+      theBigTree.bParticleNetAK4JetTags_probb->at(bjet2idx),
+      theBigTree.bParticleNetAK4JetTags_probc->at(bjet2idx),
+      theBigTree.bParticleNetAK4JetTags_probuds->at(bjet2idx),
+      theBigTree.mT_Dau2->at (chosenTauPair),
+      theBigTree.mT_Dau1->at (chosenTauPair),
+      Calculate_MT(tlv_firstLepton, tlv_secondLepton), 
+      Calculate_TotalMT(tlv_firstLepton, tlv_secondLepton, tlv_MET),
+      tlv_tauH.M (),
+      Num_neutrinos,
+      pairType,
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_secondLepton),
+      fabs(ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet)),
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet),
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_MET),
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_bH, tlv_MET),
+      1.,
+      Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), 		getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).first,
+	Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).second,
+	ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH + tlv_MET),
+	ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH), 
+	Calculate_phi (getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+	Calculate_phi1(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)), 	Calculate_phi1(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+	Calculate_cosTheta_2bodies(getLVfromTLV(tlv_MET), getLVfromTLV(tlv_bH)), Calculate_cosTheta_2bodies(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_bH))    
+);
+	}
+
+      else if (pairType == 2){
+
+	diTauMLMass = diTauML.GetScore(
+        tlv_firstLepton.Px (), 
+        tlv_firstLepton.Py (),
+        tlv_firstLepton.Pz (),
+        theBigTree.daughters_e->at (firstDaughterIndex), 
+        tlv_secondLepton.Px (), 
+        tlv_secondLepton.Py (),
+        tlv_secondLepton.Pz (), 
+        theBigTree.daughters_e->at (secondDaughterIndex),
+        tlv_firstLepton.Pt (),
+        tlv_firstLepton.Eta () ,
+        tlv_firstLepton.Phi () ,
+        tlv_secondLepton.Pt (),
+        tlv_secondLepton.Eta () ,
+        tlv_secondLepton.Phi () ,
+
+        theBigTree.decayMode->at(firstDaughterIndex),
+	theBigTree.decayMode->at(secondDaughterIndex),
+        
+        deltaPhi (tlv_firstLepton.Phi (),tlv_secondLepton.Phi ()),
+        fabs(tlv_firstLepton.Eta ()- tlv_secondLepton.Eta ()) ,
+
+         TVector2::Phi_mpi_pi(vMET.Phi()),
+    	 vMET.Mod(), 
+         vMET.X(),
+         vMET.Y(),
+
+        vDeepMET_ResponseTune.X(),
+        vDeepMET_ResponseTune.Y(),
+        vDeepMET_ResolutionTune.X(),
+        vDeepMET_ResolutionTune.Y(),
+
+        theBigTree.MET_cov00->at (chosenTauPair), 
+        theBigTree.MET_cov01->at (chosenTauPair),
+        theBigTree.MET_cov11->at (chosenTauPair),
+    	
+        theBigTree.npv ,
+        
+       tlv_firstBjet.Pt () ,
+       tlv_firstBjet.Eta () ,
+       tlv_firstBjet.Phi () ,
+        
+       theBigTree.bDeepFlavor_probb->at(bjet1idx) + theBigTree.bDeepFlavor_probbb->at(bjet1idx) + theBigTree.bDeepFlavor_problepb->at(bjet1idx),
+
+      theBigTree.bParticleNetAK4JetTags_probb->at(bjet1idx),
+      theBigTree.bParticleNetAK4JetTags_probc->at(bjet1idx),
+      theBigTree.bParticleNetAK4JetTags_probuds->at(bjet1idx),
+
+       tlv_secondBjet.Pt () ,
+       tlv_secondBjet.Eta () ,
+       tlv_secondBjet.Phi () ,
+       
+       theBigTree.bDeepFlavor_probb->at(bjet2idx) + theBigTree.bDeepFlavor_probbb->at(bjet2idx) + theBigTree.bDeepFlavor_problepb->at(bjet2idx),
+
+      theBigTree.bParticleNetAK4JetTags_probb->at(bjet2idx),
+      theBigTree.bParticleNetAK4JetTags_probc->at(bjet2idx),
+      theBigTree.bParticleNetAK4JetTags_probuds->at(bjet2idx),
+
+      theBigTree.mT_Dau2->at (chosenTauPair),
+      theBigTree.mT_Dau1->at (chosenTauPair),
+      
+
+      Calculate_MT(tlv_firstLepton, tlv_secondLepton), 
+      Calculate_TotalMT(tlv_firstLepton, tlv_secondLepton, tlv_MET),
+      tlv_tauH.M (),
+
+
+      Num_neutrinos,
+
+      pairType,
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_secondLepton),
+      fabs(ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet)),
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_firstBjet, tlv_secondBjet),
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_firstLepton, tlv_MET),
+      ROOT::Math::VectorUtil::DeltaPhi(tlv_bH, tlv_MET),
+
+      1., 
+	Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), 		getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).first,
+	Calculate_topPairMasses(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_MET)).second,
+	ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH + tlv_MET),
+	ROOT::Math::VectorUtil::InvariantMass(tlv_bH, tlv_tauH), 
+	Calculate_phi (getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+	Calculate_phi1(getLVfromTLV(tlv_firstLepton), getLVfromTLV(tlv_secondLepton), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)), 	Calculate_phi1(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_secondBjet), getLVfromTLV(tlv_tauH_SVFIT), getLVfromTLV(tlv_bH)),
+	Calculate_cosTheta_2bodies(getLVfromTLV(tlv_MET), getLVfromTLV(tlv_bH)), Calculate_cosTheta_2bodies(getLVfromTLV(tlv_firstBjet), getLVfromTLV(tlv_bH))    
+);
+       }
+
+
+
+ // MARTINA ---------------------------------------------
+
+	//theSmallTree.ML_nu1_px = diTauMLMass.at(0);
+        //theSmallTree.ML_nu1_py = diTauMLMass.at(1);
+        //theSmallTree.ML_nu1_pz = diTauMLMass.at(2);
+        //theSmallTree.ML_nu1_e = diTauMLMass.at(3);
+        //theSmallTree.ML_nu2_px = diTauMLMass.at(4);
+        //theSmallTree.ML_nu2_py = diTauMLMass.at(5);
+        //theSmallTree.ML_nu2_pz = diTauMLMass.at(6);
+        //theSmallTree.ML_nu2_e = diTauMLMass.at(7);
+        //theSmallTree.ML_minv2 = diTauMLMass.at(8);
+
+        //Add branches ML Classifier 
+        theSmallTree.m_ML_classifier0 = diTauMLMass.at(9);
+        theSmallTree.m_ML_classifier1 = diTauMLMass.at(10);
+        theSmallTree.m_ML_classifier2 = diTauMLMass.at(11);
+        //Add branches MassHH and  MassTauTau
+        TLorentzVector  tau1_vis, tau2_vis, nu1, nu2, HH;
+        TLorentzVector bjet1, bjet2, bb;
+	double bjet1_px = tlv_firstBjet.Pt () *cos(tlv_firstBjet.Phi ());
+	double bjet1_py = tlv_firstBjet.Pt () *sin(tlv_firstBjet.Phi ());
+	double bjet1_pz = tlv_firstBjet.Pt () *TMath::SinH(tlv_firstBjet.Eta ());
+	double bjet1_e = tlv_firstBjet.Pt () *TMath::CosH(tlv_firstBjet.Eta ());
+	double bjet2_px = tlv_secondBjet.Pt () *cos(tlv_secondBjet.Phi ());
+	double bjet2_py = tlv_secondBjet.Pt () *sin(tlv_secondBjet.Phi ());
+	double bjet2_pz = tlv_secondBjet.Pt () *TMath::SinH(tlv_secondBjet.Eta ());
+	double bjet2_e = tlv_secondBjet.Pt () *TMath::CosH(tlv_secondBjet.Eta ());
+	bjet1.SetPxPyPzE(bjet1_px, bjet1_py, bjet1_pz, bjet1_e);
+	bjet2.SetPxPyPzE(bjet2_px, bjet2_py, bjet2_pz, bjet2_e);
+	// Calculate the bb system four-vector
+	bb = bjet1 + bjet2;
+	// Calculate the invariant mass of the bb system
+	double bb_mass = bb.M();
+      tau1_vis.SetPxPyPzE(tlv_firstLepton.Px (),tlv_firstLepton.Py (),tlv_firstLepton.Pz (),theBigTree.daughters_e->at (firstDaughterIndex));
+      tau2_vis.SetPxPyPzE(tlv_secondLepton.Px (),tlv_secondLepton.Py (),tlv_secondLepton.Pz (),theBigTree.daughters_e->at (secondDaughterIndex));
+      nu1.SetPxPyPzE(diTauMLMass.at(0), diTauMLMass.at(1), diTauMLMass.at(2), diTauMLMass.at(3));
+      nu2.SetPxPyPzE(diTauMLMass.at(4), diTauMLMass.at(5), diTauMLMass.at(6), diTauMLMass.at(7));
+      TLorentzVector tau1 = tau1_vis + nu1;
+      TLorentzVector tau2 = tau2_vis + nu2;
+      // Calculate the four-momentum of the Higgs boson
+      TLorentzVector higgsTauTau = tau1 + tau2;
+      // Calculate the invariant mass of the Higgs boson
+      float  higgs_mass_tautau = higgsTauTau.M();
+      //Calculate HH mass
+      HH = tau1 + tau2 + nu1 + nu2 + bjet1 + bjet2;
+      float HH_mass= HH.M();
+      theSmallTree.m_ML_MassTauTau = higgs_mass_tautau;
+      theSmallTree.m_ML_MassHH = HH_mass;
+
+     //std::cout<<"Higgs mass tautau"<< higgs_mass_tautau <<endl; */
+
+ }// if there's two jets in the event, at least
+
+//T LORENTZ VECTOR...
+
+
+
+     
     if (isMC) selectedEvents += theBigTree.aMCatNLOweight ;  //FIXME: probably wrong, but unused up to now
     else selectedEvents += 1 ;
     ++selectedNoWeightsEventsNum ;

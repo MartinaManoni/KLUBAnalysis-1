@@ -631,6 +631,23 @@ struct smallTree
       m_tauH_SVFIT_METphi = -1. ;
       m_tauH_SVFIT_METrho = -1. ;
 
+      //MARTINA
+      //m_nu1_px = -1.;
+      //m_nu1_py = -1.;
+      //m_nu1_pz = -1.;
+      //m_nu1_e = -1.;
+
+      m_ML_classifier0_LOW =-1;
+      m_ML_classifier1_LOW =-1;
+      m_ML_classifier2_LOW =-1;
+      m_ML_MassTauTau_LOW =-1;
+      m_ML_MassHH_LOW=-1;
+
+      m_ML_classifier0_HIGH =-1;
+      m_ML_classifier1_HIGH =-1;
+      m_ML_classifier2_HIGH =-1;
+      m_ML_MassTauTau_HIGH=-1;
+      m_ML_MassHH_HIGH=-1;
 
       m_tauH_SVFIT_mass_up   = -1. ;
       m_tauH_SVFIT_mass_down = -1. ;
@@ -1895,6 +1912,26 @@ struct smallTree
       m_smallT->Branch ("tauH_SVFIT_mass_down", &m_tauH_SVFIT_mass_down, "tauH_SVFIT_mass_down/F") ;
       m_smallT->Branch ("tauH_SVFIT_mass_METup", &m_tauH_SVFIT_mass_METup, "tauH_SVFIT_mass_METup/F") ;
       m_smallT->Branch ("tauH_SVFIT_mass_METdown", &m_tauH_SVFIT_mass_METdown, "tauH_SVFIT_mass_METdown/F") ;
+
+
+//MARTINA
+     // m_smallT->Branch ("nu1_px", &m_nu1_px, "nu1_px/F") ;
+      //m_smallT->Branch ("nu1_py", &m_nu1_py, "nu1_py/F") ;
+      //m_smallT->Branch ("nu1_pz", &m_nu1_pz, "nu1_pz/F") ;
+      //m_smallT->Branch ("nu1_e", &m_nu1_e, "nu1_e/F") ;
+     
+      m_smallT->Branch ("ML_classifier0_LOW", &m_ML_classifier0_LOW, "ML_classifier0_LOW/F") ;
+      m_smallT->Branch ("ML_classifier1_LOW", &m_ML_classifier1_LOW, "ML_classifier1_LOW/F") ;
+      m_smallT->Branch ("ML_classifier2_LOW", &m_ML_classifier2_LOW, "ML_classifier2_LOW/F") ;
+      m_smallT->Branch ("ML_MassTauTau_LOW", &m_ML_MassTauTau_LOW, "ML_MassTauTau_LOW/F") ;
+      m_smallT->Branch ("ML_MassHH_LOW", &m_ML_MassHH_LOW, "ML_MassHH_LOW/F") ;
+
+     m_smallT->Branch ("ML_classifier0_HIGH", &m_ML_classifier0_HIGH, "ML_classifier0_HIGH/F") ;
+      m_smallT->Branch ("ML_classifier1_HIGH", &m_ML_classifier1_HIGH, "ML_classifier1_HIGH/F") ;
+      m_smallT->Branch ("ML_classifier2_HIGH", &m_ML_classifier2_HIGH, "ML_classifier2_HIGH/F") ;
+      m_smallT->Branch ("ML_MassTauTau_HIGH", &m_ML_MassTauTau_HIGH, "ML_MassTauTau_HIGH/F") ;
+      m_smallT->Branch ("ML_MassHH_HIGH", &m_ML_MassHH_HIGH, "ML_MassHH_HIGH/F") ;
+
 
       m_smallT->Branch ("bH_pt", &m_bH_pt, "bH_pt/F") ;
       m_smallT->Branch ("bH_eta", &m_bH_eta, "bH_eta/F") ;
@@ -3163,6 +3200,23 @@ struct smallTree
   Float_t m_tauH_SVFIT_mass_METup ;
   Float_t m_tauH_SVFIT_mass_METdown ;
 
+  //MARTINA
+  //Float_t m_nu1_px ;
+  //Float_t m_nu1_py ;
+  //Float_t m_nu1_pz ;
+  //Float_t m_nu1_e ;
+
+  Float_t m_ML_classifier0_LOW;
+  Float_t m_ML_classifier1_LOW;
+  Float_t m_ML_classifier2_LOW;
+  Float_t m_ML_MassTauTau_LOW;
+  Float_t m_ML_MassHH_LOW;
+
+    Float_t m_ML_classifier0_HIGH;
+  Float_t m_ML_classifier1_HIGH;
+  Float_t m_ML_classifier2_HIGH;
+  Float_t m_ML_MassTauTau_HIGH;
+  Float_t m_ML_MassHH_HIGH;
   // the bb-H candidate
   Float_t m_bH_pt ;
   Float_t m_bH_eta ;

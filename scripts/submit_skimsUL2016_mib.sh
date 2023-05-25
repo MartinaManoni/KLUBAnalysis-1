@@ -1,14 +1,15 @@
 # LOG
-OUTDIRR="SKIMS_UL2016_6Apr2022"
+OUTDIRR="SKIMS_UL2016_LOG_neutrini"
 
 # INPUT
-INPUTDIR="inputFiles/Resonant2016_backgrounds"
-INPUTDIR_DATA="inputFiles/Resonant2016_data"
-INPUTDIR_SIG="inputFiles/Resonant2016_signals"
+INPUTDIR="/gwpool/users/dzuolo/HHbbtautauAnalysisUL/CMSSW_11_1_9/src/KLUBAnalysis/inputFiles/Resonant2016_backgrounds"
+INPUTDIR_DATA="/gwpool/users/dzuolo/HHbbtautauAnalysisUL/CMSSW_11_1_9/src/KLUBAnalysis/inputFiles/Resonant2016_data"
+INPUTDIR_SIG="/gwpool/users/dzuolo/HHbbtautauAnalysisUL/CMSSW_11_1_9/src/KLUBAnalysis/inputFiles/Resonant2016_signals"
 
 # OUTPUT
-SKIMDIR="/gwdata/z/users/dzuolo/ResonantHHbbtautauAnalysis/SKIMS_Res_UL2016_6Apr2022_correctPostVFP"
-
+SKIMDIR="/gwdata/users/mmanoni/SKIMS_UL2016_neutrini"
+#gwdata/users/mmanoni/SKIMS_UL2016_prove
+#SKIMDIR="/gwdata/z/users/dzuolo/ResonantHHbbtautauAnalysis/SKIMS_Res_UL2016_6Apr2022_correctPostVFP"
 # PU weights
 PUDIR="/gwpool/users/dzuolo/HHbbtautauAnalysisUL/CMSSW_11_1_0_pre6/src/KLUBAnalysis/weights/PUreweight/UL_Run2_PU_SF/2016/"
 
@@ -16,7 +17,6 @@ PUDIR="/gwpool/users/dzuolo/HHbbtautauAnalysisUL/CMSSW_11_1_0_pre6/src/KLUBAnaly
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 source scripts/setup.sh
 mkdir $OUTDIRR
-
 
 ###################
 # TT
@@ -27,15 +27,31 @@ mkdir $OUTDIRR
 # hl = 21.9% (x2 for permutation t-tbar)
 # TT had
 echo "Submitting - TT - "
-echo "Submitting - TT - " >> log_6Apr2022.txt
+echo "Submitting - TT - " >> log_new.txt
 echo "OUTDIR = $OUTDIRR"
-echo "OUTDIR = $OUTDIRR" >> log_6Apr2022.txt
+echo "OUTDIR = $OUTDIRR" >> log_new.txt
 
-python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib.cfg  -Y 2016 -n 50  -k True -o $SKIMDIR/SKIM_TT_fullyHad -i $INPUTDIR/TTToHadronic.txt     -x 377.96 -t True -b 1 -q longcms --pu $PUDIR/PU_UL2016_SF.txt
+python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib_Martina.cfg  -Y 2016 -n 200 -k True -o $SKIMDIR/SKIM_TT_semiLep  -i $INPUTDIR/TTToSemiLeptonic.txt -x 365.34 -t True -b 5 -q longcms --pu $PUDIR/PU_UL2016_SF.txt
 
-python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib.cfg  -Y 2016 -n 200 -k True -o $SKIMDIR/SKIM_TT_fullyLep -i $INPUTDIR/TTTo2L2Nu.txt        -x 88.29  -t True -b 4 -q longcms --pu $PUDIR/PU_UL2016_SF.txt
+#python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib_Martina.cfg  -Y 2016 -n 50  -k True -o $SKIMDIR/SKIM_TT_fullyHad -i $INPUTDIR/TTToHadronic.txt     -x 377.96 -t True -b 1 -q longcms --pu $PUDIR/PU_UL2016_SF.txt
 
-python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib.cfg  -Y 2016 -n 200 -k True -o $SKIMDIR/SKIM_TT_semiLep  -i $INPUTDIR/TTToSemiLeptonic.txt -x 365.34 -t True -b 5 -q longcms --pu $PUDIR/PU_UL2016_SF.txt
+#python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib_Martina.cfg  -Y 2016 -n 200 -k True -o $SKIMDIR/SKIM_TT_fullyLep -i $INPUTDIR/TTTo2L2Nu.txt        -x 88.29  -t True -b 4 -q longcms --pu $PUDIR/PU_UL2016_SF.txt
+
+
+
+######################
+### SIGNALS :
+######################
+echo "Submitting - Signals GGF Radion - "
+echo "Submitting - Signals GGF Radion - " >> log_new1.txt
+echo "OUTDIR = $OUTDIRR"
+echo "OUTDIR = $OUTDIRR" >> log_new1.txt
+
+python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib_Martina.cfg  -Y 2016 -n 20 -k True -o $SKIMDIR/SKIM_ggF_Radion_m300  -i $INPUTDIR_SIG/GluGluToRadionToHHTo2B2Tau_M-300.txt  -x 1. -a True -q longcms --pu $PUDIR/PU_UL2016_SF.txt
+
+python scripts/skimNtuple_mib.py -T $OUTDIRR -s True -c config/skim_UL2016_mib_Martina.cfg  -Y 2016 -n 20 -k True -o $SKIMDIR/SKIM_ggF_Radion_m900  -i $INPUTDIR_SIG/GluGluToRadionToHHTo2B2Tau_M-900.txt -x 1. -a True -q longcms --pu $PUDIR/PU_UL2016_SF.txt
+
+
 
 <<COMMENT1
 
